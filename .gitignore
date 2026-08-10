@@ -3,3 +3,9 @@
 **/app.db
 **/app.db-shm
 **/app.db-wal
+**/workforce.db
+**/workforce.db-shm
+**/workforce.db-wal
+**/external.db
+**/external.db-shm
+**/external.db-wal

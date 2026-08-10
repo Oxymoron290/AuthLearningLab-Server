@@ -4,7 +4,7 @@
     ViewData["Title"] = "Authorization server";
 }
 
-<h1>CookieLearning authorization server</h1>
+<h1>@Model.DisplayName</h1>
 
 <p>
     This local OpenIddict server supports Authorization Code + PKCE and legacy
@@ -13,11 +13,11 @@
 
 <dl>
     <dt>Issuer</dt>
-    <dd><code>https://localhost:7001/</code></dd>
+    <dd><code>@Model.Issuer</code></dd>
     <dt>Discovery</dt>
     <dd><a href="/.well-known/openid-configuration"><code>/.well-known/openid-configuration</code></a></dd>
     <dt>Development user</dt>
-    <dd><code>alice@example.test</code></dd>
+    <dd><code>@Model.UserEmail</code></dd>
 </dl>
 
 <p><a class="btn btn-primary" asp-page="/Diagnostics">Open diagnostics</a></p>

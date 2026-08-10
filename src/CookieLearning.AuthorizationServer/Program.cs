@@ -1,12 +1,26 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using CookieLearning.AuthorizationServer.Configuration;
 using CookieLearning.AuthorizationServer.Data;
 using CookieLearning.AuthorizationServer.Diagnostics;
 using CookieLearning.AuthorizationServer.OpenIddict;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.Sqlite;
 using OpenIddict.Abstractions;
+using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var provider = builder.Configuration
+    .GetRequiredSection(ProviderSettings.SectionName)
+    .Get<ProviderSettings>()
+    ?? throw new InvalidOperationException("Provider configuration is required.");
+
+if (!Uri.TryCreate(provider.Issuer, UriKind.Absolute, out var issuer) ||
+    !string.Equals(issuer.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException("Provider:Issuer must be an absolute HTTPS URI.");
+}
 
 var configuredConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -25,6 +39,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseOpenIddict();
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddSingleton(provider);
+builder.Services.AddDataProtection()
+    .SetApplicationName($"CookieLearning.AuthorizationServer.{provider.InstanceId}");
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     {
@@ -36,7 +53,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.Name = "__Host-CookieLearning.Server";
+    options.Cookie.Name = provider.CookieName;
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -50,6 +67,7 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
+        options.SetIssuer(issuer);
         options.SetAuthorizationEndpointUris("connect/authorize")
             .SetTokenEndpointUris("connect/token")
             .SetUserInfoEndpointUris("connect/userinfo")
@@ -69,8 +87,10 @@ builder.Services.AddOpenIddict()
             OpenIddictConstants.Scopes.Roles,
             OpenIddictConstants.Scopes.OfflineAccess);
 
-        options.AddDevelopmentEncryptionCertificate()
-            .AddDevelopmentSigningCertificate();
+        options.AddDevelopmentEncryptionCertificate(
+                new X500DistinguishedName($"CN=CookieLearning {provider.InstanceId} Encryption"))
+            .AddDevelopmentSigningCertificate(
+                new X500DistinguishedName($"CN=CookieLearning {provider.InstanceId} Signing"));
 
         options.UseAspNetCore()
             .EnableAuthorizationEndpointPassthrough()

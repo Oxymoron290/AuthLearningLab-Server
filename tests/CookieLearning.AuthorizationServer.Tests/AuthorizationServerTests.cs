@@ -26,7 +26,7 @@ public sealed class AuthorizationServerTests : IClassFixture<WebApplicationFacto
         var document = await _client.GetFromJsonAsync<DiscoveryDocument>("/.well-known/openid-configuration");
 
         Assert.NotNull(document);
-        Assert.Equal("https://localhost/", document.Issuer);
+        Assert.Equal("https://localhost:7001/", document.Issuer);
         Assert.Contains("code", document.ResponseTypesSupported);
         Assert.Contains("id_token", document.ResponseTypesSupported);
         Assert.Contains("code id_token", document.ResponseTypesSupported);
@@ -74,7 +74,7 @@ public sealed class AuthorizationServerTests : IClassFixture<WebApplicationFacto
 
         var login = await _client.PostAsync("/Identity/Account/Login", new FormUrlEncodedContent(new Dictionary<string, string>
         {
-            ["Input.Email"] = "alice@example.test",
+            ["Input.Email"] = "alice@workforce.example.test",
             ["Input.Password"] = "Passw0rd!",
             ["Input.RememberMe"] = "false",
             ["__RequestVerificationToken"] = loginToken
@@ -83,7 +83,7 @@ public sealed class AuthorizationServerTests : IClassFixture<WebApplicationFacto
         Assert.Equal(HttpStatusCode.Redirect, login.StatusCode);
         Assert.Contains(
             login.Headers.GetValues("Set-Cookie"),
-            value => value.StartsWith("__Host-CookieLearning.Server=", StringComparison.Ordinal));
+            value => value.StartsWith("__Host-CookieLearning.Workforce=", StringComparison.Ordinal));
 
         var diagnosticsPage = await _client.GetStringAsync("/Diagnostics");
         var diagnosticsToken = GetAntiforgeryToken(diagnosticsPage);
@@ -95,7 +95,7 @@ public sealed class AuthorizationServerTests : IClassFixture<WebApplicationFacto
         Assert.Equal(HttpStatusCode.Redirect, reset.StatusCode);
         Assert.Contains(
             reset.Headers.GetValues("Set-Cookie"),
-            value => value.StartsWith("__Host-CookieLearning.Server=;", StringComparison.Ordinal));
+            value => value.StartsWith("__Host-CookieLearning.Workforce=;", StringComparison.Ordinal));
     }
 
     private static string GetAntiforgeryToken(string html)
