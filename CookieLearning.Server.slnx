@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CookieLearning.AuthorizationServer/CookieLearning.AuthorizationServer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CookieLearning.AuthorizationServer.Tests/CookieLearning.AuthorizationServer.Tests.csproj" />
+  </Folder>
+</Solution>

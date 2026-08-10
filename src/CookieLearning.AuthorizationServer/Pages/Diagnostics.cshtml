@@ -1,0 +1,49 @@
+@page
+@model CookieLearning.AuthorizationServer.Pages.DiagnosticsModel
+@{
+    ViewData["Title"] = "Diagnostics";
+}
+
+<h1>Cookie and protocol diagnostics</h1>
+
+<div class="alert alert-warning">
+    Development only. Values, tokens, credentials, and signing material are intentionally never recorded.
+</div>
+
+<p>
+    The authorization server owns the ASP.NET Core Identity session cookie. Katana nonce,
+    correlation, and application cookies will be visible only after a client project is added.
+</p>
+
+<form method="post" class="mb-3">
+    <button class="btn btn-outline-danger" type="submit">Clear events and sign out</button>
+</form>
+
+<table class="table table-sm">
+    <thead>
+    <tr>
+        <th>UTC</th>
+        <th>Category</th>
+        <th>Action</th>
+        <th>Trace</th>
+        <th>Sanitized details</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Events)
+    {
+        <tr>
+            <td>@item.Timestamp.ToString("u")</td>
+            <td>@item.Category</td>
+            <td>@item.Action</td>
+            <td><code>@item.TraceIdentifier</code></td>
+            <td>
+                @foreach (var detail in item.Details)
+                {
+                    <div><strong>@detail.Key:</strong> <code>@detail.Value</code></div>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

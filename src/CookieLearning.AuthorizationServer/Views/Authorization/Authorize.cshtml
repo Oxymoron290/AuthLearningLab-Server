@@ -1,0 +1,19 @@
+@model CookieLearning.AuthorizationServer.Models.AuthorizationViewModel
+@{
+    ViewData["Title"] = "Authorize";
+}
+
+<h1>Authorize @Model.ApplicationName</h1>
+
+<p>
+    Signed in as <strong>@Model.UserName</strong>. The client
+    <code>@Model.ClientId</code> requested:
+</p>
+
+<pre>@Model.Scope</pre>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <button class="btn btn-primary" type="submit" name="decision" value="accept">Allow</button>
+    <button class="btn btn-outline-danger" type="submit" name="decision" value="deny">Deny</button>
+</form>
